@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 20. Apr 2024 um 23:54
+-- Erstellungszeit: 22. Apr 2024 um 18:01
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -32,15 +32,21 @@ CREATE TABLE `appointments` (
   `title` varchar(255) DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,
   `date` date DEFAULT NULL,
-  `voting_expiry_date` date DEFAULT NULL
+  `voting_expiry_date` date DEFAULT NULL,
+  `startingTime` time DEFAULT NULL,
+  `endTime` time DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Daten für Tabelle `appointments`
 --
 
-INSERT INTO `appointments` (`appointment_id`, `title`, `location`, `date`, `voting_expiry_date`) VALUES
-(1, 'Lukas aichbauer fetzen', 'Fh technikum', '2024-04-20', '2024-04-19');
+INSERT INTO `appointments` (`appointment_id`, `title`, `location`, `date`, `voting_expiry_date`, `startingTime`, `endTime`) VALUES
+(1, 'Lukas aichbauer fetzen', 'Fh technikum', '2024-04-20', '2024-04-19', '09:00:00', '17:00:00'),
+(2, 'Betriebsausflug', 'Simmering, Wien', '2024-04-20', '2024-04-19', '10:00:00', '18:00:00'),
+(3, 'Wellness', 'Ottakring, Wien', '2024-04-24', '2024-04-21', '11:00:00', '19:00:00'),
+(4, 'Fußballturnier', 'Liesing, Wien', '2024-06-20', '2024-05-19', '12:00:00', '20:00:00'),
+(5, 'Wanderausflug', 'Marchfeld, Niederösterreich', '2024-05-20', '2024-04-19', '13:00:00', '21:00:00');
 
 -- --------------------------------------------------------
 
@@ -63,7 +69,6 @@ CREATE TABLE `selectable_dates` (
 CREATE TABLE `users` (
   `user_id` int(11) NOT NULL,
   `username` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -120,7 +125,7 @@ ALTER TABLE `user_appointments`
 -- AUTO_INCREMENT für Tabelle `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT für Tabelle `selectable_dates`
