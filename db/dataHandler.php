@@ -12,22 +12,6 @@ class DataHandler
         $this->conn = $conn;
     }
 
-    public function queryPersons()
-    {
-        $res = array();
-        $sql = "SELECT * FROM persons";
-        $result = $this->conn->query($sql);
-
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $res[] = new Person($row["id"], $row["firstname"], $row["lastname"], $row["email"], $row["phone"], $row["department"]);
-            }
-        }
-        return $res;
-    }
-
-
-
     public function queryAppointments()
     {
         $res = array();

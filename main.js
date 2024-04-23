@@ -1,36 +1,87 @@
+let currentWeekStart = getMonday(new Date());
+
 window.onload = function() {
+    fillWeekTable(currentWeekStart);
+
+    document.getElementById('prevWeek').addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        fillWeekTable(currentWeekStart);
+    });
+
+    document.getElementById('nextWeek').addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        fillWeekTable(currentWeekStart);
+    });
+};
+
+function getMonday(d) {
+    d = new Date(d);
+    var day = d.getDay(),
+        diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is Sunday
+    return new Date(d.setDate(diff));
+}
+
+function fillWeekTable(weekStart) {
+    updateTableHeader(weekStart);
+    const weekBody = document.getElementById('weekBody');
+    weekBody.innerHTML = ''; // clear the body
+
     fetch('serviceHandler.php?method=queryAppointments')
-        .then(response => response.json())  // parse the response as JSON
+        .then(response => response.json())
         .then(data => {
-            console.log(data);  // log the parsed data
-            const appointmentsDiv = document.getElementById('appointments');
-            // Sort appointments by date and time
-            data.sort((a, b) => new Date(a.date + ' ' + a.startingTime) - new Date(b.date + ' ' + b.startingTime));
-            data.forEach(appointment => {
-                const div = document.createElement('div');
-                div.className = 'appointment-box form-check';
+            const weekDays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+            for (let i = 0; i < 7; i++) {
+                const cellDate = new Date(weekStart);
+                cellDate.setDate(cellDate.getDate() + i);
+                cellDate.setHours(0, 0, 0, 0); // set time to 00:00:00.000
 
-                const input = document.createElement('input');
-                input.className = 'form-check-input';
-                input.type = 'checkbox';
-                input.value = '';
-                input.id = `appointment${appointment.appointment_id}`;
+                const row = document.createElement('tr');
 
-                const label = document.createElement('label');
-                label.className = 'form-check-label';
-                label.htmlFor = input.id;
-                const currentDate = new Date();
-                const appointmentDate = new Date(appointment.date);
-                let expiredText = '';
-                if (appointmentDate < currentDate) {
-                    expiredText = ' (Expired)';
-                }
-                label.textContent = `${appointment.title}, ${appointment.location}, ${appointment.date}, ${appointment.voting_expiry_date}, ${appointment.startingTime}, ${appointment.endTime}${expiredText}`;
+                const appointmentsOnThisDay = data.filter(appointment => {
+                    const appointmentDate = new Date(appointment.date);
+                    appointmentDate.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+                    return appointmentDate.getTime() === cellDate.getTime();
+                });
+                appointmentsOnThisDay.forEach(appointment => {
+                    const cell = document.createElement('td');
+                    cell.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${appointment.title}</h5>
+                                <p class="card-text">${appointment.startingTime}-${appointment.endTime}</p>
+                            </div>
+                        </div>
+                    `;
 
-                div.appendChild(input);
-                div.appendChild(label);
-                appointmentsDiv.appendChild(div);
-            });
+                    row.appendChild(cell);
+                });
+
+                weekBody.appendChild(row);
+            }
         })
         .catch(error => console.error('Error:', error));
-};
+}
+
+function updateTableHeader(weekStart) {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+
+    const weekDays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+    const weekHeader = document.getElementById('weekTable').querySelector('thead tr');
+    weekHeader.innerHTML = ''; // clear the header
+
+    for (let i = 0; i < 7; i++) {
+        const cellDate = new Date(weekStart);
+        cellDate.setDate(cellDate.getDate() + i);
+
+        const headerCell = document.createElement('th');
+        headerCell.textContent = `${weekDays[i]} (${cellDate.getDate()}.${cellDate.getMonth()+1}.${cellDate.getFullYear()})`;
+
+        // Highlight the cell if it's the current date
+        if (cellDate.getTime() === currentDate.getTime()) {
+            headerCell.style.backgroundColor = 'grey';
+        }
+
+        weekHeader.appendChild(headerCell);
+    }
+}
