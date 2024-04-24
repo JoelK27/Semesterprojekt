@@ -16,7 +16,9 @@ class DataHandler
     {
         $res = array();
         $sql = "SELECT * FROM appointments";
-        $result = $this->conn->query($sql);
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
@@ -25,4 +27,20 @@ class DataHandler
         }
         return $res;
     }
+
+    public function queryAppointmentID( $appointment_id){
+        $res = array();
+        $sql = "SELECT * FROM appointments WHERE appointment_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $appointment_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $res[] = new Appointment($row["appointment_id"], $row["title"], $row["location"], $row["date"], $row["voting_expiry_date"], $row["startingTime"], $row["endTime"]);
+            }
+        }
+        return $res;
+    }
 }
+?>

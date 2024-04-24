@@ -17,7 +17,11 @@ class SimpleLogic
             case "queryAppointments":
                 $res = $this->dh->queryAppointments();
                 break;
-            // ... rest of the switch statement
+            case "queryAppointmentID":
+                $res = $this->dh->queryAppointmentID($param);
+                break;
+            default:
+                $res = null;
         }
         return $res;
     }
