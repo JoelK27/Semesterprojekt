@@ -45,6 +45,7 @@ function fillWeekTable(weekStart) {
     fetch('serviceHandler.php?method=queryAppointments')
         .then(response => response.json())
         .then(data => {
+            console.log(data);
             const weekDays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
             const row = document.createElement('tr'); // Create the row here
             for (let i = 0; i < 7; i++) {
@@ -55,18 +56,18 @@ function fillWeekTable(weekStart) {
                 const cell = document.createElement('td'); // Create the cell here
             
                 // Loop through appointments to find those matching the current date
-                for (const appointment of data) {
+                // Loop through appointments to find those matching the current date
+                for (const appointmentInfo of data) {
+                    const appointment = appointmentInfo.appointment;
                     const appointmentDate = appointment.date;
                     if (isDatesEqual(cellDate, appointmentDate)) {
                         // Create a card element for each appointment
                         const card = document.createElement('div');
                         card.classList.add('card');
                         card.style.margin = '20px'; // Set margin bottom to 20px
-                        card.addEventListener('click', function() {
-                            // This function will be executed when the card is clicked
-                            openPopup();
-                            console.log('Card was clicked!');
-                        });
+
+                        // Store the appointment ID in a data attribute
+                        card.dataset.appointmentId = appointment.appointment_id;
 
                         // Create the card body
                         const cardBody = document.createElement('div');
@@ -81,8 +82,23 @@ function fillWeekTable(weekStart) {
                         const cardText = document.createElement('p');
                         cardText.classList.add('card-text');
                         cardText.textContent = `${appointment.startingTime}-${appointment.endTime}`;
+
+                        // Create the book button
+                        const bookButton = document.createElement('button');
+                        bookButton.classList.add('btn', 'btn-primary');
+                        bookButton.textContent = 'Book';
+                        bookButton.style.position = 'absolute';
+                        bookButton.style.bottom = '10px';
+                        bookButton.style.right = '10px';
+                        bookButton.addEventListener('click', function() {
+                            console.log(card.dataset.appointmentId);
+                            // Pass the appointment ID to the openPopup function
+                            openPopup(card.dataset.appointmentId);
+                        });
+
                         cardBody.appendChild(cardTitle);
                         cardBody.appendChild(cardText);
+                        cardBody.appendChild(bookButton);
                         card.appendChild(cardBody);
                         cell.appendChild(card);
                     }
@@ -118,7 +134,23 @@ function updateTableHeader(weekStart) {
         weekHeader.appendChild(headerCell);
     }
 }
+
+
 function openPopup() {
     const popup = document.getElementById('popup');
     popup.style.display = 'block';
 }
+
+// Select the modal and the "Close" button
+const modal = document.getElementById('popup');
+const closeButton = document.querySelector('.modal-footer .btn-secondary');
+
+// Add an event listener to the "Close" button
+closeButton.addEventListener('click', function() {
+    modal.style.display = 'none';
+});
+
+
+
+
+

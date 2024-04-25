@@ -1,5 +1,6 @@
 <?php
-include("./models/person.php");
+include("./models/appointment.php");
+include("./models/appointmentInfo.php");
 include("./db/dbConnection.php");
 
 class DataHandler
@@ -12,35 +13,38 @@ class DataHandler
         $this->conn = $conn;
     }
 
+
     public function queryAppointments()
     {
         $res = array();
-        $sql = "SELECT * FROM appointments";
+        $sql = "SELECT appointments.*, appointment_info.username, appointment_info.comment 
+                FROM appointments 
+                LEFT JOIN appointment_info ON appointments.appointment_id = appointment_info.appointment_id";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
+            $appointments = array();
             while($row = $result->fetch_assoc()) {
-                $res[] = new Appointment($row["appointment_id"], $row["title"], $row["location"], $row["date"], $row["voting_expiry_date"], $row["startingTime"], $row["endTime"]);
+                $appointmentId = $row["appointment_id"];
+                if (!isset($appointments[$appointmentId])) {
+                    $appointment = new Appointment($appointmentId, $row["title"], $row["location"], $row["date"], $row["voting_expiry_date"], $row["startingTime"], $row["endTime"]);
+                    $appointments[$appointmentId] = array(
+                        'appointment' => $appointment,
+                        'usernames' => array(),
+                        'comments' => array()
+                    );
+                }
+                $appointments[$appointmentId]['usernames'][] = $row["username"];
+                $appointments[$appointmentId]['comments'][] = $row["comment"];
+            }
+            foreach ($appointments as $appointment) {
+                $res[] = new AppointmentInfo($appointment['appointment'], $appointment['usernames'], $appointment['comments']);
             }
         }
         return $res;
     }
 
-    public function queryAppointmentID( $appointment_id){
-        $res = array();
-        $sql = "SELECT * FROM appointments WHERE appointment_id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $appointment_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $res[] = new Appointment($row["appointment_id"], $row["title"], $row["location"], $row["date"], $row["voting_expiry_date"], $row["startingTime"], $row["endTime"]);
-            }
-        }
-        return $res;
-    }
 }
 ?>
